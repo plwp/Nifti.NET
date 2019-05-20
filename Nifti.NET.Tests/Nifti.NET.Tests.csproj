@@ -1,0 +1,64 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="resources\avg152T1_LR_nifti.hdr" />
+    <None Remove="resources\avg152T1_LR_nifti.hdr.gz" />
+    <None Remove="resources\avg152T1_LR_nifti.nii" />
+    <None Remove="resources\avg152T1_LR_nifti.nii.gz" />
+    <None Remove="resources\avg152T1_RL_nifti.hdr" />
+    <None Remove="resources\gato.nii" />
+    <None Remove="resources\minimal.hdr.gz" />
+    <None Remove="resources\minimal.img.gz" />
+    <None Remove="resources\minimal.nii.gz" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="resources\avg152T1_LR_nifti.nii">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="resources\avg152T1_RL_nifti.hdr">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="resources\avg152T1_LR_nifti.hdr">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\avg152T1_LR_nifti.hdr.gz">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\avg152T1_LR_nifti.nii.gz">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\gato.nii">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\minimal.hdr.gz">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\minimal.img.gz">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\minimal.nii.gz">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="nunit" Version="3.10.1" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.10.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Nifti.NET\Nifti.NET.csproj" />
+  </ItemGroup>
+
+</Project>
