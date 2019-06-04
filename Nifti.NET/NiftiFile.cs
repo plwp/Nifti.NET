@@ -77,7 +77,7 @@ namespace Nifti.NET
 
                 // For a nifti file we can just keep on writing.
                 if (FileType.NII == type) Write(stream, nifti.Data);
-
+                stream.Flush();
             }
 
             // If the file type is hdr/img we want to split the data.
@@ -88,6 +88,7 @@ namespace Nifti.NET
                 using (var stream = WriteStream(newPath, gzip))
                 {
                     Write(stream, nifti.Data);
+                    stream.Flush();
                 }
             }
         }
@@ -384,7 +385,7 @@ namespace Nifti.NET
         private static float[] ReadFloats(Stream stream, int count, bool reverseBytes)
         {
             var result = new float[count];
-            for (var i = 0; i < count; ++i) ReadFloat(stream, reverseBytes);
+            for (var i = 0; i < count; ++i) result[i] = ReadFloat(stream, reverseBytes);
             return result;
         }
 
