@@ -1,4 +1,40 @@
-﻿namespace Nifti.NET
+﻿// NOTE: This file is based on the official NIfTI header file C definition.
+// The following authorship statement is attached to ensure full credit remains
+// with Bobby Cox, et al., but this library has no affiliation with the NIH or the 
+// original authors.
+/*****************************************************************************
+      ** This file defines the "NIFTI-1" header format.               **
+      ** It is derived from 2 meetings at the NIH (31 Mar 2003 and    **
+      ** 02 Sep 2003) of the Data Format Working Group (DFWG),        **
+      ** chartered by the NIfTI (Neuroimaging Informatics Technology  **
+      ** Initiative) at the National Institutes of Health (NIH).      **
+      **--------------------------------------------------------------**
+      ** Neither the National Institutes of Health (NIH), the DFWG,   **
+      ** nor any of the members or employees of these institutions    **
+      ** imply any warranty of usefulness of this material for any    **
+      ** purpose, and do not assume any liability for damages,        **
+      ** incidental or otherwise, caused by any use of this document. **
+      ** If these conditions are not acceptable, do not use this!     **
+      **--------------------------------------------------------------**
+      ** Author:   Robert W Cox (NIMH, Bethesda)                      **
+      ** Advisors: John Ashburner (FIL, London),                      **
+      **           Stephen Smith (FMRIB, Oxford),                     **
+      **           Mark Jenkinson (FMRIB, Oxford)                     **
+******************************************************************************/
+
+/*---------------------------------------------------------------------------*/
+/* Note that the ANALYZE 7.5 file header (dbh.h) is
+         (c) Copyright 1986-1995
+         Biomedical Imaging Resource
+         Mayo Foundation
+   Incorporation of components of dbh.h are by permission of the
+   Mayo Foundation.
+
+   Changes from the ANALYZE 7.5 file header in this file are released to the
+   public domain, including the functional comments and any amusing asides.
+-----------------------------------------------------------------------------*/
+
+namespace Nifti.NET
 {
     public class NiftiHeader
     {
