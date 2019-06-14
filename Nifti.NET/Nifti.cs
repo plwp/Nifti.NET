@@ -56,7 +56,8 @@ namespace Nifti.NET
         /// </summary>
         public dynamic Data { get; set; }
         /// <summary>
-        /// 
+        /// Allows multi-dimensional access to the data.
+        /// These coordinates correspond with the i, j, k system in the NiftiHeader, meaning the stride will increase from i to k (and onwards).
         /// </summary>
         /// <param name="idx"></param>
         /// <returns></returns>
