@@ -77,8 +77,8 @@ namespace Tests
                 _ = NiftiFile.ReadHeader(path);
                 Assert.Fail("Failed to fail.");
             }
-            catch (InvalidDataException e){}
-            catch (Exception e)
+            catch (InvalidDataException){}
+            catch (Exception)
             {
                 Assert.Fail("Hmmm...");
             }
@@ -88,8 +88,8 @@ namespace Tests
                 _ = NiftiFile.Read(path);
                 Assert.Fail("Failed to fail.");
             }
-            catch (InvalidDataException e) { }
-            catch (Exception e)
+            catch (InvalidDataException) { }
+            catch (Exception)
             {
                 Assert.Fail("Hmmm...");
             }
