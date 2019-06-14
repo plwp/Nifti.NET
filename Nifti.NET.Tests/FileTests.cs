@@ -78,9 +78,9 @@ namespace Tests
                 Assert.Fail("Failed to fail.");
             }
             catch (InvalidDataException){}
-            catch (Exception)
+            catch (Exception e)
             {
-                Assert.Fail("Hmmm...");
+                Assert.Fail("Hmmm... " + e.Message);
             }
 
             try
@@ -89,9 +89,9 @@ namespace Tests
                 Assert.Fail("Failed to fail.");
             }
             catch (InvalidDataException) { }
-            catch (Exception)
+            catch (Exception e)
             {
-                Assert.Fail("Hmmm...");
+                Assert.Fail("Hmmm..." + e.Message);
             }
         }
 

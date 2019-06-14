@@ -54,7 +54,6 @@ namespace Nifti.NET
             using (var stream = ReadStream(path))
             {
                 var hdr = ReadHeader(stream);
-                if (TypeOf(hdr) == FileType.UNKNOWN) throw new InvalidDataException("Not a NIfTI file (no magic bytes)");
                 return hdr;
             }
         }
@@ -280,6 +279,10 @@ namespace Nifti.NET
                     hdr.edata = ReadBytes(stream, hdr.esize - 8);
                 }
             }
+
+            if (TypeOf(hdr) == FileType.UNKNOWN) throw new InvalidDataException("Not a NIfTI file (no magic bytes)");
+            if (hdr.dim[0] > 7) throw new InvalidDataException("NIFTI header is using more than 7 dimensions. I don't really know how to handle that :\\");
+            else if (hdr.dim[0] < 0) throw new InvalidDataException("Somethings broken with the dimensions...");
 
             return hdr;
         }
