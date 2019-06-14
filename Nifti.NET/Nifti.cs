@@ -24,7 +24,7 @@ namespace Nifti.NET
             }
             set
             {
-                // Set dimentions.
+                // Set dimensions.
                 Dimensions = new int[value.dim[0]];
                 Stride = new int[value.dim[0]];
 
