@@ -2,6 +2,18 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Version>1.1.0</Version>
+    <Authors>Patrick Prendergast</Authors>
+    <Company>SLP</Company>
+    <Description>A simple library for handling NIfTI files.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/plwp/Nifti.NET</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/plwp/Nifti.NET</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <PackageReleaseNotes>***138th Download Spectacular Update***
+Allow for dimensional indexing (i.e. nifti[1,2,3]).
+Made it easier to cast to statically typed data.</PackageReleaseNotes>
+    <NeutralLanguage>en-AU</NeutralLanguage>
   </PropertyGroup>
 
   <ItemGroup>
