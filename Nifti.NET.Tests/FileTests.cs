@@ -149,11 +149,30 @@ namespace Tests
 
             var nifti = NiftiFile.Read(niiFile);
 
-            NiftiFile.Write(nifti.Header, tmp);
+            NiftiFile.Write(nifti, tmp);
             var nifti2 = NiftiFile.Read(tmp);
 
             Assert.IsTrue(nifti.Header.magic[2] == nifti2.Header.magic[2]);
             Assert.IsTrue(nifti.Header.cal_max == nifti2.Header.cal_max);
+
+            File.Delete(tmp);
+        }
+
+        [Test]
+        public void TestWriteTypedNii()
+        {
+            var niiFile = Path.Combine("resources", "minimal.nii.gz");
+            var tmp = "tmp.nii";
+
+            var nifti = NiftiFile.Read(niiFile).AsType<byte>();
+
+            NiftiFile.Write(nifti, tmp);
+            var nifti2 = NiftiFile.Read(tmp);
+
+            Assert.IsTrue(nifti.Header.magic[2] == nifti2.Header.magic[2]);
+            Assert.IsTrue(nifti.Header.cal_max == nifti2.Header.cal_max);
+            Assert.IsTrue(nifti.Data[1] == nifti2.Data[1]);
+            Assert.IsTrue(nifti.Data[60] == nifti2.Data[60]);
 
             File.Delete(tmp);
         }

@@ -138,7 +138,7 @@ namespace Nifti.NET
     /// <typeparam name="T"></typeparam>
     public class Nifti<T> : Nifti
     {
-        public new T[] Data { get; set; }
+        public new T[] Data { get { return ((Nifti)this).Data; } set { ((Nifti)this).Data = value; } }
 
         public new T this[params int[] idx]
         {
