@@ -1,6 +1,7 @@
 using Nifti.NET;
 using NUnit.Framework;
 using System;
+using System.Drawing;
 using System.IO;
 
 namespace Tests
@@ -175,6 +176,27 @@ namespace Tests
             Assert.IsTrue(nifti.Data[60] == nifti2.Data[60]);
 
             File.Delete(tmp);
+        }
+
+        [Test]
+        public void ColorConversion()
+        {
+            var niiFile = Path.Combine("resources", "minimal.nii.gz");
+            var tmp = "color_pattern.nii";
+
+            var nifti = NiftiFile.Read(niiFile);
+
+            var colors = new Color[nifti.Data.Length];
+            for (int i = 0; i < colors.Length; ++i)
+            {
+                colors[i] = Color.FromArgb(i%256, (i / 2) % 256, (i / 4) % 256);
+            }
+
+            nifti.Data = colors;
+            System.Console.WriteLine(nifti.Header.datatype);
+            System.Console.WriteLine(nifti.Header.data_type);
+
+            NiftiFile.Write(nifti, tmp);
         }
     }
 }

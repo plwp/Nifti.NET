@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.IO;
 using System.IO.Compression;
 
@@ -68,6 +69,12 @@ namespace Nifti.NET
         /// <param name="gzip"></param>
         public static void Write(Nifti nifti, string path, bool gzip = false)
         {
+            if (typeof(Color[]) == nifti.Data.GetType())
+            {
+                System.Console.WriteLine("Detected Color data. Converting to 24bit RBG representation.");
+                nifti = ConvertToRGB(nifti);
+            }
+
             FileType type = TypeOf(nifti.Header);
             if (gzip && !path.EndsWith(".gz")) path += ".gz";
             using (var stream = WriteStream(path, gzip))
@@ -170,6 +177,9 @@ namespace Nifti.NET
                     for (int i = 0; i < data.Length; ++i) data[i] = ReadFloat(stream, reverseBytes);
                     break;
                 case NiftiHeader.DT_INT32:
+                    for (int i = 0; i < data.Length; ++i) data[i] = ReadInt(stream, reverseBytes);
+                    break;
+                case NiftiHeader.DT_UINT32:
                     for (int i = 0; i < data.Length; ++i) data[i] = ReadInt(stream, reverseBytes);
                     break;
                 case NiftiHeader.DT_INT16:
@@ -354,6 +364,11 @@ namespace Nifti.NET
             stream.Write(BitConverter.GetBytes(val), 0, sizeof(int));
         }
 
+        private static void Write(Stream stream, uint val)
+        {
+            stream.Write(BitConverter.GetBytes(val), 0, sizeof(uint));
+        }
+
         private static void Write(Stream stream, short val)
         {
             stream.Write(BitConverter.GetBytes(val), 0, sizeof(short));
@@ -377,7 +392,12 @@ namespace Nifti.NET
             stream.WriteByte(val);
         }
 
-        private static void Write(Stream stream, byte[] vals) { foreach (var val in vals) Write(stream, val); }
+        //private static void Write(Stream stream, byte[] vals) { foreach (var val in vals) Write(stream, val); }
+        private static void Write(Stream stream, byte[] vals) 
+        {
+            stream.Write(vals, 0, vals.Length);
+        }
+
         private static void Write(Stream stream, int[] vals) { foreach (var val in vals) Write(stream, val); }
         private static void Write(Stream stream, float[] vals) { foreach (var val in vals) Write(stream, val); }
         private static void Write(Stream stream, short[] vals) { foreach (var val in vals) Write(stream, val); }
@@ -409,6 +429,13 @@ namespace Nifti.NET
             return !reverseBytes ?
                 BitConverter.ToInt32(ReadBytes(stream, 4), 0) 
                 : BitConverter.ToInt32(ReadBytesReversed(stream, 4), 0);
+        }
+
+        private static uint ReadUInt(Stream stream, bool reverseBytes)
+        {
+            return !reverseBytes ?
+                BitConverter.ToUInt32(ReadBytes(stream, 4), 0)
+                : BitConverter.ToUInt32(ReadBytesReversed(stream, 4), 0);
         }
 
         private static short ReadShort(Stream stream, bool reverseBytes)
@@ -451,6 +478,29 @@ namespace Nifti.NET
             var result = new byte[count];
             for (int i = count; i > 0; --i) result[i - 1] = (byte)stream.ReadByte();
             return result;
+        }
+
+        private static Nifti ConvertToRGB(Nifti nifti)
+        {
+            nifti.Header.dim[0] = 5; // RGB and RGBA both have 5 dimensions
+            nifti.Header.dim[4] = 1; 
+            nifti.Header.dim[5] = 3; // 3 channels for RGB
+            nifti.Header.bitpix = 24;
+            nifti.Header.datatype = NiftiHeader.DT_RGB;
+            nifti.Header.intent_code = NiftiHeader.NIFTI_INTENT_RGB_VECTOR;
+
+            var data = new byte[nifti.Data.Length * 3];
+            for (int i = 0; i < data.Length; i+=3)
+            {
+                // Convert RGB to uint
+                data[i] = nifti.Data[i/3].R;
+                data[i+1] = nifti.Data[i/3].G;
+                data[i+2] = nifti.Data[i/3].B;
+            }
+
+            nifti.Data = data;
+
+            return nifti;
         }
     }
 }
