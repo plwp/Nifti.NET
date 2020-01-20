@@ -196,7 +196,15 @@ namespace Tests
             System.Console.WriteLine(nifti.Header.datatype);
             System.Console.WriteLine(nifti.Header.data_type);
 
+            // Write color data
             NiftiFile.Write(nifti, tmp);
+            var tmp2 = tmp + ".2.nii";
+            // Copy and check that size hasn't changed
+            NiftiFile.Write(NiftiFile.Read(tmp), tmp2);
+            Assert.AreEqual(new System.IO.FileInfo(tmp).Length, new System.IO.FileInfo(tmp2).Length);
+            // Remove these lines to check output files
+            File.Delete(tmp);
+            File.Delete(tmp2);
         }
     }
 }

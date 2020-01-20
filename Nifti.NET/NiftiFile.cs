@@ -191,6 +191,12 @@ namespace Nifti.NET
                 case NiftiHeader.DT_COMPLEX:
                     for (int i = 0; i < data.Length; ++i) data[i] = ReadLong(stream, reverseBytes);
                     break;
+                case NiftiHeader.DT_RGB24:
+                    for (int i = 0; i < data.Length; ++i) data[i] = ReadRGB(stream, reverseBytes);
+                    break;
+                case NiftiHeader.DT_RGBA32:
+                    for (int i = 0; i < data.Length; ++i) data[i] = ReadRGBA(stream, reverseBytes);
+                    break;
                 default:
                     for (int i = 0; i < data.Length; ++i) data[i] = ReadByte(stream);
                     break;
@@ -211,6 +217,8 @@ namespace Nifti.NET
             if (NiftiHeader.DT_INT16 == datatype) return new short[bytelen / sizeof(short)];
             if (NiftiHeader.DT_DOUBLE == datatype) return new double[bytelen / sizeof(double)];
             if (NiftiHeader.DT_COMPLEX == datatype) return new long[bytelen / sizeof(long)];
+            if (NiftiHeader.DT_RGB24 == datatype) return new Color[bytelen / 3];
+            if (NiftiHeader.DT_RGBA32 == datatype) return new Color[bytelen / 4];
             //if (NiftiHeader.DT_BINARY == datatype) return new bool[bytelen * 8];
             return new byte[bytelen];
         }
@@ -466,6 +474,19 @@ namespace Nifti.NET
                 : BitConverter.ToInt64(ReadBytesReversed(stream, 8), 0);
         }
 
+        private static Color ReadRGB(Stream stream, bool reverseBytes)
+        {
+            byte[] rgb = ReadBytes(stream, 3);
+            return Color.FromArgb(rgb[0], rgb[1], rgb[2]);
+        }
+
+        private static Color ReadRGBA(Stream stream, bool reverseBytes)
+        {
+            byte[] rgba = ReadBytes(stream, 4);
+            return Color.FromArgb(rgba[3], rgba[0], rgba[1], rgba[2]);
+
+        }
+
         private static byte[] ReadBytes(Stream stream, int count)
         {
             var result = new byte[count];
@@ -482,23 +503,44 @@ namespace Nifti.NET
 
         private static Nifti ConvertToRGB(Nifti nifti)
         {
-            nifti.Header.dim[0] = 5; // RGB and RGBA both have 5 dimensions
-            nifti.Header.dim[4] = 1; 
-            nifti.Header.dim[5] = 3; // 3 channels for RGB
-            nifti.Header.bitpix = 24;
-            nifti.Header.datatype = NiftiHeader.DT_RGB;
-            nifti.Header.intent_code = NiftiHeader.NIFTI_INTENT_RGB_VECTOR;
-
-            var data = new byte[nifti.Data.Length * 3];
-            for (int i = 0; i < data.Length; i+=3)
+            // Handle 32bit RGBA data
+            if (nifti.Header.datatype == NiftiHeader.DT_RGBA32)
             {
-                // Convert RGB to uint
-                data[i] = nifti.Data[i/3].R;
-                data[i+1] = nifti.Data[i/3].G;
-                data[i+2] = nifti.Data[i/3].B;
+                var bytedata = new byte[nifti.Data.Length * 4];
+                for (int i = 0; i < bytedata.Length; i += 4)
+                {
+                    // Convert RGB to uint
+                    bytedata[i] = nifti.Data[i / 4].R;
+                    bytedata[i + 1] = nifti.Data[i / 4].G;
+                    bytedata[i + 2] = nifti.Data[i / 4].B;
+                    bytedata[i + 3] = nifti.Data[i / 4].A;
+                }
+
+                nifti.Data = bytedata;
+            }
+            else
+            {
+                // Setup the header info in case someone converted from non-color input
+                nifti.Header.dim[0] = 5; // RGB and RGBA both have 5 dimensions
+                nifti.Header.dim[4] = 1;
+                nifti.Header.dim[5] = 3; // 3 channels for RGB
+                nifti.Header.bitpix = 24;
+                nifti.Header.datatype = NiftiHeader.DT_RGB;
+                nifti.Header.intent_code = NiftiHeader.NIFTI_INTENT_RGB_VECTOR;
+
+                var bytedata = new byte[nifti.Data.Length * 3];
+                for (int i = 0; i < bytedata.Length; i += 3)
+                {
+                    // Convert RGB to uint
+                    bytedata[i] = nifti.Data[i / 3].R;
+                    bytedata[i + 1] = nifti.Data[i / 3].G;
+                    bytedata[i + 2] = nifti.Data[i / 3].B;
+                }
+
+                nifti.Data = bytedata;
             }
 
-            nifti.Data = data;
+            
 
             return nifti;
         }
