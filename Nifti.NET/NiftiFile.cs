@@ -12,10 +12,9 @@ namespace Nifti.NET
         /// <summary>
         /// Read a Nifti file (or hdr/img pair).
         /// </summary>
-        /// <param name="path">Path to Nifti file</param>
-        /// <param name="forceType">This can be used to force the data to be a certain type (usually DT_UNSIGNED_byte) </param>
+        /// <param name="path"></param>
         /// <returns></returns>
-        public static Nifti Read(string path, short forceType=NiftiHeader.DT_UNKNOWN)
+        public static Nifti Read(string path, short forceType = NiftiHeader.DT_UNKNOWN)
         {
             Nifti result = new Nifti();
 
@@ -168,12 +167,12 @@ namespace Nifti.NET
 
         private static dynamic ReadData(Stream stream, NiftiHeader hdr, short forceType)
         {
+            var datatype = forceType != NiftiHeader.DT_UNKNOWN ? forceType : hdr.datatype;
             var reverseBytes = hdr.SourceIsBigEndian();
             var bytelen = stream.Length - stream.Position;
-
-            var datatype = forceType != NiftiHeader.DT_UNKNOWN ? forceType : hdr.datatype;
             var data = InitData(datatype, bytelen);
-            switch (datatype)
+
+            switch(datatype)
             {
                 case NiftiHeader.DT_FLOAT32:
                     for (int i = 0; i < data.Length; ++i) data[i] = ReadFloat(stream, reverseBytes);
@@ -194,52 +193,10 @@ namespace Nifti.NET
                     for (int i = 0; i < data.Length; ++i) data[i] = ReadLong(stream, reverseBytes);
                     break;
                 case NiftiHeader.DT_RGB24:
-                    var bytes = ReadBytes(stream, (int)bytelen);
-                    System.Console.WriteLine(data.Length);
-                    for (int i = 0; i < data.Length; )
-                    {
-                        for(int z = 0; z < hdr.dim[3]; ++z)
-                        {
-                            for (int y = 0; y < hdr.dim[2]; ++y)
-                            {
-                                for (int x = 0; x < hdr.dim[1] && i < data.Length; ++x)
-                                {
-                                    try
-                                    {
-                                        data[i] = Color.FromArgb(
-                                        bytes[StupidRgbIndex(x, y, z, 0, hdr)],
-                                        bytes[StupidRgbIndex(x, y, z, 1, hdr)],
-                                        bytes[StupidRgbIndex(x, y, z, 2, hdr)]);
-                                    }
-                                    i++;
-                                }
-                            }
-                                
-                        }
-                        
-                    }
+                    for (int i = 0; i < data.Length; ++i) data[i] = ReadRGB(stream, reverseBytes);
                     break;
                 case NiftiHeader.DT_RGBA32:
-                    var bytes2 = ReadBytes(stream, (int)bytelen);
-                    for (int i = 0; i < data.Length;)
-                    {
-                        for (int z = 0; z < hdr.dim[3]; ++z)
-                        {
-                            for (int y = 0; y < hdr.dim[2]; ++y)
-                            {
-                                for (int x = 0; x < hdr.dim[1] && i < data.Length; ++x)
-                                {
-                                    data[i] = Color.FromArgb(
-                                        bytes2[StupidRgbIndex(x, y, z, 3, hdr)],
-                                        bytes2[StupidRgbIndex(x, y, z, 0, hdr)],
-                                        bytes2[StupidRgbIndex(x, y, z, 1, hdr)],
-                                        bytes2[StupidRgbIndex(x, y, z, 2, hdr)]);
-
-                                    i++;
-                                }
-                            }
-                        }
-                    }
+                    for (int i = 0; i < data.Length; ++i) data[i] = ReadRGBA(stream, reverseBytes);
                     break;
                 default:
                     for (int i = 0; i < data.Length; ++i) data[i] = ReadByte(stream);
@@ -247,12 +204,6 @@ namespace Nifti.NET
             }
 
             return data;
-
-        }
-
-        private static int StupidRgbIndex(int x, int y, int z, int rgb, NiftiHeader hdr)
-        {
-            return (x + y * hdr.dim[1] + z * hdr.dim[1] * hdr.dim[2] + rgb * hdr.dim[1] * hdr.dim[2] * hdr.dim[3]);// * hdr.bitpix / 8;
         }
 
         private static void WriteData(Stream stream, dynamic data)
@@ -557,23 +508,13 @@ namespace Nifti.NET
             if (nifti.Header.datatype == NiftiHeader.DT_RGBA32)
             {
                 var bytedata = new byte[nifti.Data.Length * 4];
-                for (int i = 0; i < nifti.Data.Length;)
+                for (int i = 0; i < bytedata.Length; i += 4)
                 {
-                    for (int z = 0; z < nifti.Header.dim[3]; ++z)
-                    {
-                        for (int y = 0; y < nifti.Header.dim[2]; ++y)
-                        {
-                            for (int x = 0; x < nifti.Header.dim[1] && i < nifti.Data.Length; ++x)
-                            {
-                                bytedata[StupidRgbIndex(x, y, z, 3, nifti.Header)] = nifti.Data[i].A;
-                                bytedata[StupidRgbIndex(x, y, z, 0, nifti.Header)] = nifti.Data[i].R;
-                                bytedata[StupidRgbIndex(x, y, z, 1, nifti.Header)] = nifti.Data[i].G;
-                                bytedata[StupidRgbIndex(x, y, z, 2, nifti.Header)] = nifti.Data[i].B;
-
-                                i++;
-                            }
-                        }
-                    }
+                    // Convert RGB to uint
+                    bytedata[i] = nifti.Data[i / 4].R;
+                    bytedata[i + 1] = nifti.Data[i / 4].G;
+                    bytedata[i + 2] = nifti.Data[i / 4].B;
+                    bytedata[i + 3] = nifti.Data[i / 4].A;
                 }
 
                 nifti.Data = bytedata;
@@ -589,22 +530,12 @@ namespace Nifti.NET
                 nifti.Header.intent_code = NiftiHeader.NIFTI_INTENT_RGB_VECTOR;
 
                 var bytedata = new byte[nifti.Data.Length * 3];
-                for (int i = 0; i < nifti.Data.Length;)
+                for (int i = 0; i < bytedata.Length; i += 3)
                 {
-                    for (int z = 0; z < nifti.Header.dim[3]; ++z)
-                    {
-                        for (int y = 0; y < nifti.Header.dim[2]; ++y)
-                        {
-                            for (int x = 0; x < nifti.Header.dim[1] && i < nifti.Data.Length; ++x)
-                            {
-                                bytedata[StupidRgbIndex(x, y, z, 0, nifti.Header)] = nifti.Data[i].R;
-                                bytedata[StupidRgbIndex(x, y, z, 1, nifti.Header)] = nifti.Data[i].G;
-                                bytedata[StupidRgbIndex(x, y, z, 2, nifti.Header)] = nifti.Data[i].B;
-
-                                i++;
-                            }
-                        }
-                    }
+                    // Convert RGB to uint
+                    bytedata[i] = nifti.Data[i / 3].R;
+                    bytedata[i + 1] = nifti.Data[i / 3].G;
+                    bytedata[i + 2] = nifti.Data[i / 3].B;
                 }
 
                 nifti.Data = bytedata;
