@@ -2,17 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>1.1.1</Version>
+    <Version>1.1.2</Version>
     <Authors>Patrick Prendergast</Authors>
-    <Company>SLP</Company>
+    <Company>plwp</Company>
     <Description>A simple library for handling NIfTI files.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/plwp/Nifti.NET</PackageProjectUrl>
     <RepositoryUrl>https://github.com/plwp/Nifti.NET</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
-    <PackageReleaseNotes>Fixed (hopefully) polymorphism issue that was breaking writing of typed Nifti files.
-Y'all should shoot me a bug report if things are broken next time.</PackageReleaseNotes>
+    <PackageReleaseNotes>Added uint16 support</PackageReleaseNotes>
     <NeutralLanguage>en-AU</NeutralLanguage>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
