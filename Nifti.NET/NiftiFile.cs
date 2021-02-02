@@ -186,6 +186,9 @@ namespace Nifti.NET
                 case NiftiHeader.DT_INT16:
                     for (int i = 0; i < data.Length; ++i) data[i] = ReadShort(stream, reverseBytes);
                     break;
+                case NiftiHeader.DT_UINT16:
+                    for (int i = 0; i < data.Length; ++i) data[i] = ReadUShort(stream, reverseBytes);
+                    break;
                 case NiftiHeader.DT_DOUBLE:
                     for (int i = 0; i < data.Length; ++i) data[i] = ReadDouble(stream, reverseBytes);
                     break;
@@ -216,6 +219,7 @@ namespace Nifti.NET
             if (NiftiHeader.DT_FLOAT32 == datatype) return new float[bytelen / sizeof(float)];
             if (NiftiHeader.DT_INT32 == datatype) return new int[bytelen / sizeof(int)];
             if (NiftiHeader.DT_INT16 == datatype) return new short[bytelen / sizeof(short)];
+            if (NiftiHeader.DT_UINT16 == datatype) return new ushort[bytelen / sizeof(short)];
             if (NiftiHeader.DT_DOUBLE == datatype) return new double[bytelen / sizeof(double)];
             if (NiftiHeader.DT_COMPLEX == datatype) return new long[bytelen / sizeof(long)];
             if (NiftiHeader.DT_RGB24 == datatype) return new Color[bytelen / 3];
@@ -383,6 +387,11 @@ namespace Nifti.NET
             stream.Write(BitConverter.GetBytes(val), 0, sizeof(short));
         }
 
+        private static void Write(Stream stream, ushort val)
+        {
+            stream.Write(BitConverter.GetBytes(val), 0, sizeof(ushort));
+        }
+
         private static void Write(Stream stream, float val)
         {
             stream.Write(BitConverter.GetBytes(val), 0, sizeof(float));
@@ -412,7 +421,6 @@ namespace Nifti.NET
         private static void Write(Stream stream, short[] vals) { foreach (var val in vals) Write(stream, val); }
         private static void Write(Stream stream, long[] vals) { foreach (var val in vals) Write(stream, val); }
         private static void Write(Stream stream, double[] vals) { foreach (var val in vals) Write(stream, val); }
-
 
         private static float[] ReadFloats(Stream stream, int count, bool reverseBytes)
         {
@@ -445,6 +453,19 @@ namespace Nifti.NET
             return !reverseBytes ?
                 BitConverter.ToUInt32(ReadBytes(stream, 4), 0)
                 : BitConverter.ToUInt32(ReadBytesReversed(stream, 4), 0);
+        }
+
+        private static ushort ReadUShort(Stream stream, bool reverseBytes)
+        {
+            return !reverseBytes ?
+                BitConverter.ToUInt16(ReadBytes(stream, 2), 0)
+                : BitConverter.ToUInt16(ReadBytesReversed(stream, 2), 0);
+        }
+        private static ushort[] ReadUrShorts(Stream stream, int count, bool reverseBytes)
+        {
+            var result = new ushort[count];
+            for(var i = 0; i < count; ++i) result[i] = ReadUShort(stream, reverseBytes);
+            return result;
         }
 
         private static short ReadShort(Stream stream, bool reverseBytes)
@@ -540,8 +561,6 @@ namespace Nifti.NET
 
                 nifti.Data = bytedata;
             }
-
-            
 
             return nifti;
         }
