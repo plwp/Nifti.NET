@@ -361,8 +361,6 @@ namespace Nifti.NET
             Write(stream, hdr.intent_name);
             Write(stream, hdr.magic);
 
-            if (stream.Position != 348) throw new Exception("Oh shit.");
-
             Write(stream, hdr.extension);
             if (hdr.extension[0] == 1)
             {

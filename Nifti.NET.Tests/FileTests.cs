@@ -65,6 +65,11 @@ namespace Tests
             Assert.IsTrue(nifti1.Data[100] == nifti2.Data[100]);
             Assert.IsTrue(nifti1.Header.sizeof_hdr == nifti2.Header.sizeof_hdr);
             Assert.IsTrue(nifti1.Header.slice_start == nifti2.Header.slice_start);
+
+            var tmp = "tmp.nii.gz";
+            NiftiFile.Write(nifti1, tmp, gzip:true);
+            Assert.IsTrue(File.Exists(tmp));
+            File.Delete(tmp);
         }
 
         [Test]
