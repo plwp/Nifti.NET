@@ -543,7 +543,7 @@ namespace Nifti.NET
                 // Setup the header info in case someone converted from non-color input
                 nifti.Header.dim[0] = 5; // RGB and RGBA both have 5 dimensions
                 nifti.Header.dim[4] = 1;
-                nifti.Header.dim[5] = 3; // 3 channels for RGB
+                nifti.Header.dim[5] = 1;
                 nifti.Header.bitpix = 24;
                 nifti.Header.datatype = NiftiHeader.DT_RGB;
                 nifti.Header.intent_code = NiftiHeader.NIFTI_INTENT_RGB_VECTOR;

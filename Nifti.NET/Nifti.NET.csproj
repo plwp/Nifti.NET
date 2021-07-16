@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>1.1.2</Version>
+    <Version>1.1.4</Version>
     <Authors>Patrick Prendergast</Authors>
     <Company>plwp</Company>
     <Description>A simple library for handling NIfTI files.</Description>
@@ -10,9 +10,11 @@
     <PackageProjectUrl>https://github.com/plwp/Nifti.NET</PackageProjectUrl>
     <RepositoryUrl>https://github.com/plwp/Nifti.NET</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
-    <PackageReleaseNotes>Added uint16 support</PackageReleaseNotes>
+    <PackageReleaseNotes>Fixed RGB dims problem</PackageReleaseNotes>
     <NeutralLanguage>en-AU</NeutralLanguage>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <AssemblyVersion>1.1.4.0</AssemblyVersion>
+    <FileVersion>1.1.4.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
