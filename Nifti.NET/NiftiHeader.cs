@@ -1468,6 +1468,219 @@ namespace Nifti.NET
         /// <returns>Returns size of 5th dimension if > 1, returns 0 otherwise.</returns>
         public static int Nifti5thDim(NiftiHeader h) { return h.dim[0] > 4 && h.dim[5] > 1 ? (h).dim[5] : 0; }
 
+        /// <summary>
+        /// Validates this NIfTI header against the NIfTI-1 specification.
+        /// </summary>
+        /// <returns>True if header is valid, false otherwise.</returns>
+        public bool IsValid()
+        {
+            try
+            {
+                ValidateHeader();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Validates this NIfTI header against the NIfTI-1 specification.
+        /// Throws exceptions for any violations.
+        /// </summary>
+        /// <exception cref="InvalidDataException">Thrown when header violates NIfTI-1 specification</exception>
+        public void ValidateHeader()
+        {
+            // Check header size
+            if (sizeof_hdr != EXPECTED_SIZE_OF_HDR)
+            {
+                throw new InvalidDataException($"sizeof_hdr must be {EXPECTED_SIZE_OF_HDR}, got {sizeof_hdr}");
+            }
+
+            // Check magic number
+            if (!HasValidMagicNumber())
+            {
+                var magicStr = System.Text.Encoding.ASCII.GetString(magic).TrimEnd('\0');
+                throw new InvalidDataException($"Invalid magic number: expected 'ni1' or 'n+1', got '{magicStr}'");
+            }
+
+            // Check dimensions
+            if (dim[0] < 1 || dim[0] > 7)
+            {
+                throw new InvalidDataException($"dim[0] must be 1-7, got {dim[0]}");
+            }
+
+            // Check that spatial dimensions are positive
+            for (int i = 1; i <= Math.Min(3, dim[0]); i++)
+            {
+                if (dim[i] <= 0)
+                {
+                    throw new InvalidDataException($"Spatial dimension dim[{i}] must be positive, got {dim[i]}");
+                }
+            }
+
+            // Check data type and bitpix consistency
+            if (!IsDataTypeBitpixValid())
+            {
+                throw new InvalidDataException($"Data type {datatype} and bitpix {bitpix} are inconsistent");
+            }
+
+            // Check coordinate codes
+            if (qform_code < 0 || sform_code < 0)
+            {
+                throw new InvalidDataException($"Coordinate codes must be non-negative: qform_code={qform_code}, sform_code={sform_code}");
+            }
+
+            // Check quaternion parameters (must satisfy |q| <= 1)
+            var quatMagSq = quatern_b * quatern_b + quatern_c * quatern_c + quatern_d * quatern_d;
+            if (quatMagSq > 1.0f)
+            {
+                throw new InvalidDataException($"Quaternion parameters invalid: b²+c²+d² = {quatMagSq} > 1.0");
+            }
+
+            // Check vox_offset for .nii files
+            if (IsNiiFile() && vox_offset < 352.0f)
+            {
+                throw new InvalidDataException($"vox_offset for .nii files must be >= 352, got {vox_offset}");
+            }
+
+            // Check slice timing consistency
+            if (slice_code != NIFTI_SLICE_UNKNOWN && dim[0] >= 3)
+            {
+                if (slice_start < 0 || slice_end < slice_start || slice_end >= dim[3])
+                {
+                    throw new InvalidDataException($"Invalid slice timing: slice_start={slice_start}, slice_end={slice_end}, dim[3]={dim[3]}");
+                }
+            }
+
+            // Check extension consistency
+            if (extension != null && extension.Length >= 4 && extension[0] == 1)
+            {
+                if (esize < 8)
+                {
+                    throw new InvalidDataException($"Extension size must be >= 8 when extension present, got {esize}");
+                }
+                if (edata != null && edata.Length != esize - 8)
+                {
+                    throw new InvalidDataException($"Extension data length {edata.Length} doesn't match esize-8 = {esize - 8}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Checks if the magic number is valid for NIfTI-1 format.
+        /// </summary>
+        /// <returns>True if magic number is valid</returns>
+        public bool HasValidMagicNumber()
+        {
+            if (magic == null || magic.Length < 4)
+                return false;
+
+            return (magic[0] == 0x6E && magic[2] == 0x31 && magic[3] == 0x00) &&
+                   (magic[1] == 0x69 || magic[1] == 0x2B);
+        }
+
+        /// <summary>
+        /// Checks if this header represents a .nii file (single file format).
+        /// </summary>
+        /// <returns>True if .nii file format</returns>
+        public bool IsNiiFile()
+        {
+            return magic != null && magic.Length >= 4 && 
+                   magic[0] == 0x6E && magic[1] == 0x2B && magic[2] == 0x31 && magic[3] == 0x00;
+        }
+
+        /// <summary>
+        /// Checks if this header represents a .hdr file (dual file format).
+        /// </summary>
+        /// <returns>True if .hdr file format</returns>
+        public bool IsHdrFile()
+        {
+            return magic != null && magic.Length >= 4 && 
+                   magic[0] == 0x6E && magic[1] == 0x69 && magic[2] == 0x31 && magic[3] == 0x00;
+        }
+
+        /// <summary>
+        /// Validates that the data type and bitpix fields are consistent.
+        /// </summary>
+        /// <returns>True if data type and bitpix are consistent</returns>
+        public bool IsDataTypeBitpixValid()
+        {
+            switch (datatype)
+            {
+                case DT_UINT8:
+                case DT_INT8:
+                    return bitpix == 8;
+                
+                case DT_INT16:
+                case DT_UINT16:
+                    return bitpix == 16;
+                
+                case DT_INT32:
+                case DT_UINT32:
+                case DT_FLOAT32:
+                case DT_RGBA32:
+                    return bitpix == 32;
+                
+                case DT_INT64:
+                case DT_UINT64:
+                case DT_FLOAT64:
+                case DT_COMPLEX64:
+                    return bitpix == 64;
+                
+                case DT_FLOAT128:
+                case DT_COMPLEX128:
+                    return bitpix == 128;
+                
+                case DT_COMPLEX256:
+                    return bitpix == 256;
+                
+                case DT_RGB24:
+                    return bitpix == 24;
+                
+                case DT_UNKNOWN:
+                    return bitpix == 0;
+                
+                default:
+                    return false; // Unknown data type
+            }
+        }
+
+        /// <summary>
+        /// Gets the expected number of bytes per voxel for the current data type.
+        /// </summary>
+        /// <returns>Bytes per voxel, or 0 if unknown</returns>
+        public int GetBytesPerVoxel()
+        {
+            return bitpix / 8;
+        }
+
+        /// <summary>
+        /// Calculates the total number of voxels in the dataset.
+        /// </summary>
+        /// <returns>Total number of voxels</returns>
+        public long GetTotalVoxels()
+        {
+            if (dim[0] < 1) return 0;
+            
+            long total = 1;
+            for (int i = 1; i <= dim[0]; i++)
+            {
+                total *= dim[i];
+            }
+            return total;
+        }
+
+        /// <summary>
+        /// Calculates the expected size of the image data in bytes.
+        /// </summary>
+        /// <returns>Expected data size in bytes</returns>
+        public long GetExpectedDataSize()
+        {
+            return GetTotalVoxels() * GetBytesPerVoxel();
+        }
+
         /*****************************************************************************/
      }
 }

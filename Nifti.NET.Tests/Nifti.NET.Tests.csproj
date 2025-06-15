@@ -61,4 +61,10 @@
     <ProjectReference Include="..\Nifti.NET\Nifti.NET.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="NiftiConformanceTests.cs" />
+    <Compile Include="NiftiEdgeCaseTests.cs" />
+    <Compile Include="NiftiSpecificationComplianceTests.cs" />
+  </ItemGroup>
+
 </Project>
