@@ -25,8 +25,15 @@ graph TB
     F --> H[Clinical Tools]
     F --> I[Visualization]
     
-    style E fill:#e1f5fe
-    style D fill:#f3e5f5
+    style A fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000
+    style B fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000
+    style C fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000
+    style D fill:#e3f2fd,stroke:#000000,stroke-width:2px,color:#000000
+    style E fill:#bbdefb,stroke:#000000,stroke-width:3px,color:#000000
+    style F fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000
+    style G fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000
+    style H fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000
+    style I fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000
 ```
 
 ## 🚀 Key Features
@@ -154,6 +161,11 @@ classDiagram
     NiftiFile --> NiftiObject
     NiftiObject --> NiftiHeader
     Nifti --> NiftiObject
+    
+    classDef default fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000
+    classDef primary fill:#e3f2fd,stroke:#000000,stroke-width:3px,color:#000000
+    
+    class NiftiFile,NiftiObject primary
 ```
 
 ## 🔍 Data Type Support
@@ -210,7 +222,15 @@ flowchart LR
     E --> H[Statistical Analysis]
     E --> I[Visualization]
     
-    style E fill:#bbdefb
+    style A fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000
+    style B fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000
+    style C fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000
+    style D fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000
+    style E fill:#bbdefb,stroke:#000000,stroke-width:3px,color:#000000
+    style F fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000
+    style G fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000
+    style H fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000
+    style I fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000
 ```
 
 ### Clinical Application Integration
