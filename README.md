@@ -165,7 +165,8 @@ classDiagram
     classDef default fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000
     classDef primary fill:#e3f2fd,stroke:#000000,stroke-width:3px,color:#000000
     
-    class NiftiFile,NiftiObject primary
+    class NiftiFile primary
+    class NiftiObject primary
 ```
 
 ## 🔍 Data Type Support
